@@ -9,6 +9,7 @@ router = Router()
 
 
 @router.message(F.text.lower() == "🔘 whitelist")
+@router.message(F.text.lower() == "повернутися до меню вайтлиста")
 async def handle_whitelist_menu(message: Message):
     """Handles whitelist menu."""
     user_status = await UserManager.get_user_status(

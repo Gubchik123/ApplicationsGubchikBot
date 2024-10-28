@@ -12,3 +12,11 @@ async def get_whitelist_menu_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True,
         one_time_keyboard=True,
     )
+
+
+async def get_back_whitelist_menu_keyboard() -> ReplyKeyboardMarkup:
+    """Returns back whitelist menu keyboard."""
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Повернутися до меню вайтлиста")]],
+        resize_keyboard=True,
+    )
