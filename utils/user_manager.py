@@ -1,7 +1,9 @@
 import json
 import asyncio
 import aiofiles
+from typing import NoReturn
 from datetime import datetime
+
 from data.config import USERS_FILE
 
 
@@ -77,4 +79,18 @@ class UserManager:
         """Updates the status of the user with the given ID."""
         users = await cls._load_users()
         users[str(user_id)]["status"] = new_status
+        await cls._save_users()
+
+    @classmethod
+    async def append_domain_to_whitelist(
+        cls, user_id: int, domain: str
+    ) -> None | NoReturn:
+        """Appends the domain to the whitelist of the user with the given ID."""
+        users = await cls._load_users()
+        users[str(user_id)]["whitelist"] = users[str(user_id)].get(
+            "whitelist", []
+        )
+        if domain in users[str(user_id)]["whitelist"]:
+            raise ValueError("Domain is already in the whitelist.")
+        users[str(user_id)]["whitelist"].append(domain)
         await cls._save_users()
