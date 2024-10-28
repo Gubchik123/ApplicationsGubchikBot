@@ -39,7 +39,7 @@ class UserManager:
     async def get_user_data(cls, user_id: int) -> dict:
         """Returns the data of the user with the given ID."""
         users = await cls._load_users()
-        return users.get(str(user_id), {})
+        return users.get(user_id, {})
 
     @classmethod
     async def register(cls, user_id: int):
