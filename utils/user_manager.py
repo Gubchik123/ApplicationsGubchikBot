@@ -39,14 +39,14 @@ class UserManager:
     async def get_user_data(cls, user_id: int) -> dict:
         """Returns the data of the user with the given ID."""
         users = await cls._load_users()
-        return users.get(user_id, {})
+        return users.get(str(user_id), {})
 
     @classmethod
     async def register(cls, user_id: int):
         """Registers a new user with the given ID."""
         users = await cls._load_users()
         if user_id not in users:
-            users[user_id] = {
+            users[str(user_id)] = {
                 "id": user_id,
                 "registration_date": str(datetime.now()),
                 "status": "demo",
@@ -66,8 +66,15 @@ class UserManager:
     async def is_demo_limit_reached(cls, user_id: int) -> bool:
         """Checks if the user with the given ID has reached the demo limit."""
         users = await cls._load_users()
-        user_data = users.get(user_id, {})
+        user_data = users.get(str(user_id), {})
         return (
             user_data.get("status") == "demo"
             and user_data.get("applications_sent", 0) >= 50
         )
+
+    @classmethod
+    async def update_user_status(cls, user_id: int, new_status: str):
+        """Updates the status of the user with the given ID."""
+        users = await cls._load_users()
+        users[str(user_id)]["status"] = new_status
+        await cls._save_users()
