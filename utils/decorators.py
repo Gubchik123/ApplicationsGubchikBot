@@ -21,7 +21,7 @@ def clear_state_before(handler: Callable) -> Callable:
 
         try:
             await handler(event, state)
-        except AttributeError:
+        except TypeError:
             await handler(event)
 
     return wrapper
