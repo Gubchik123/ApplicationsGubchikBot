@@ -11,6 +11,7 @@ router = Router()
 
 
 @router.message(Command("menu"))
+@router.message(Command("cancel"))
 @clear_state_before
 async def handle_menu_command(message: Message):
     """Handles the /menu command."""
