@@ -33,6 +33,12 @@ def is_valid_(url: str) -> bool:
         return False
 
 
+def parse_domain_from_(url: str) -> str:
+    """Returns domain from the given URL."""
+    domain = urlparse(url).netloc
+    return domain[4:] if domain.startswith("www.") else domain
+
+
 async def is_valid_aiohttp_(url: str) -> bool:
     """Returns True if the given URL is accessible, False otherwise."""
     try:
