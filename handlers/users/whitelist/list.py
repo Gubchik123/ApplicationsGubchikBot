@@ -31,10 +31,6 @@ async def handle_list_domains(message: Message, state: FSMContext):
 @router.message(Removing.domain)
 async def handle_domain_choice(message: Message, state: FSMContext):
     """Handles the domain choice."""
-    if message.text == "Повернутися до меню вайтлиста":
-        await state.clear()
-        return await handle_whitelist_menu(message)
-
     try:
         await UserManager.remove_domain_from_whitelist(
             user_id=message.from_user.id, domain=message.text
