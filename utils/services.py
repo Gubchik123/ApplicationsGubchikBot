@@ -1,6 +1,5 @@
 import random
 
-import aiohttp
 import phonenumbers
 from urllib.parse import urlparse
 
@@ -37,19 +36,3 @@ def parse_domain_from_(url: str) -> str:
     """Returns domain from the given URL."""
     domain = urlparse(url).netloc
     return domain[4:] if domain.startswith("www.") else domain
-
-
-async def is_valid_aiohttp_(url: str) -> bool:
-    """Returns True if the given URL is accessible, False otherwise."""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                return response.status == 200
-    except aiohttp.ClientError:
-        return False
-
-
-def extract_domain_from_(url: str) -> str:
-    """Returns domain from the given URL."""
-    parsed_url = urlparse(url)
-    return parsed_url.netloc
