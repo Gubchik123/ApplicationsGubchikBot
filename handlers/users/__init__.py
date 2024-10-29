@@ -5,6 +5,7 @@ from .menu import router as menu_router
 from .profile import router as profile_router
 from .support import router as support_router
 from .whitelist import whitelist_router
+from .applications import applications_router
 
 
 users_router = Router()
@@ -15,4 +16,5 @@ users_router.include_routers(  # ! Order is important
     profile_router,
     support_router,
     whitelist_router,
+    applications_router,
 )
