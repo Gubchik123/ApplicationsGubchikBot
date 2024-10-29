@@ -1,10 +1,9 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Dispatcher
 
-from data.config import BOT_TOKEN
+from bot import bot
 from handlers import handlers_router
 
 
-bot = Bot(token=BOT_TOKEN)
 dispatcher = Dispatcher()
 
 
