@@ -105,3 +105,10 @@ class UserManager:
             raise ValueError("Domain is not in the whitelist.")
         users[str(user_id)]["whitelist"].remove(domain)
         await cls._save_users()
+
+    @classmethod
+    async def increase_applications_sent(cls, user_id: int, count: int):
+        """Increases the number of sent applications for the user with the given ID."""
+        users = await cls._load_users()
+        users[str(user_id)]["applications_sent"] += count
+        await cls._save_users()
