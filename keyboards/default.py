@@ -7,7 +7,7 @@ async def get_menu_keyboard(user_id: int) -> ReplyKeyboardMarkup:
     """Returns the keyboard for the main menu."""
     keyboard = [
         [KeyboardButton(text="🤵 Профіль")],
-        [KeyboardButton(text="🚀 Запустити відправку заявок")],
+        [KeyboardButton(text="🚀 Відправка заявок")],
         [KeyboardButton(text="🧑‍💻 Підтримка")],
         [KeyboardButton(text="🔘 Whitelist")],
     ]
