@@ -44,7 +44,7 @@ async def get_frequency_keyboard() -> ReplyKeyboardMarkup:
 
 async def get_duration_keyboard(user_id: int) -> ReplyKeyboardMarkup:
     """Returns the keyboard for selecting the duration."""
-    durations = DURATIONS.keys()
+    durations = list(DURATIONS.keys())
     keyboard = [[KeyboardButton(text=duration)] for duration in durations[:-1]]
     user_status = await UserManager.get_user_status(user_id)
     if user_status == "admin":
