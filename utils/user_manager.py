@@ -94,3 +94,14 @@ class UserManager:
             raise ValueError("Domain is already in the whitelist.")
         users[str(user_id)]["whitelist"].append(domain)
         await cls._save_users()
+
+    @classmethod
+    async def remove_domain_from_whitelist(
+        cls, user_id: int, domain: str
+    ) -> None | NoReturn:
+        """Removes the domain from the whitelist of the user with the given ID."""
+        users = await cls._load_users()
+        if domain not in users[str(user_id)].get("whitelist", []):
+            raise ValueError("Domain is not in the whitelist.")
+        users[str(user_id)]["whitelist"].remove(domain)
+        await cls._save_users()
