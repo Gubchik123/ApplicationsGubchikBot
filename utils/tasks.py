@@ -19,7 +19,6 @@ async def request_loop(
     user_data: dict, url: str, frequency: int, duration: int
 ):
     """Task for sending requests to the specified URL."""
-    request_count = 0
     requests_to_send = (
         50 - user_data["applications_sent"]
         if user_data["status"] == "demo"
@@ -30,22 +29,21 @@ async def request_loop(
     while requests_to_send > 0:
         if end_time is not None and time.time() >= end_time:
             break
-
         error_message = await _parse(url)
         if error_message:
             await bot.send_message(user_data["user_id"], f"❌ {error_message}")
             break
         else:
-            request_count += 1
-
+            await UserManager.increment_temp_applications_sent(
+                user_data["user_id"], url
+            )
         if user_data["status"] == "demo":
             requests_to_send -= 1
-
         logging.info(f"Затримка перед наступним запитом: {frequency} секунд.")
         await asyncio.sleep(frequency)
 
-    await UserManager.increase_applications_sent(
-        user_data["user_id"], request_count
+    request_count = await UserManager.increase_applications_sent(
+        user_data["user_id"], url
     )
     await bot.send_message(
         user_data["user_id"],

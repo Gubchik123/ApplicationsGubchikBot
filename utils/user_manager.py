@@ -107,8 +107,35 @@ class UserManager:
         await cls._save_users()
 
     @classmethod
-    async def increase_applications_sent(cls, user_id: int, count: int):
-        """Increases the number of sent applications for the user with the given ID."""
+    async def increase_applications_sent(cls, user_id: int, url: str) -> int:
+        """Increases the number of sent applications
+        on the given URL for the user with the given ID."""
         users = await cls._load_users()
-        users[str(user_id)]["applications_sent"] += count
+        temp_applications_sent = await cls.get_temp_applications_sent(
+            user_id, url
+        )
+        users[str(user_id)]["applications_sent"] += temp_applications_sent
+        users[str(user_id)]["applications_per_url"].pop(url, None)
+        if not users[str(user_id)]["applications_per_url"]:
+            users[str(user_id)].pop("applications_per_url")
         await cls._save_users()
+        return temp_applications_sent
+
+    @classmethod
+    async def increment_temp_applications_sent(cls, user_id: int, url: str):
+        """Increments the number of sent applications
+        on the given URL for the user with the given ID."""
+        users = await cls._load_users()
+        users[str(user_id)]["applications_per_url"] = users[str(user_id)].get(
+            "applications_per_url", {}
+        )
+        users[str(user_id)]["applications_per_url"][url] = (
+            users[str(user_id)]["applications_per_url"].get(url, 0) + 1
+        )
+
+    @classmethod
+    async def get_temp_applications_sent(cls, user_id: int, url: str) -> int:
+        """Returns the number of sent applications
+        on the given URL for the user with the given ID."""
+        users = await cls._load_users()
+        return users[str(user_id)].get("applications_per_url", {}).get(url, 0)
