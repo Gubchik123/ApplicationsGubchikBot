@@ -49,7 +49,7 @@ async def request_loop(
     )
     await bot.send_message(
         user_data["user_id"],
-        f"✅ Відправка заявок завершена\n"
+        f"✅ Відправка заявок на {url} завершена\n"
         f"✉️ Всього відправлено заявок: {request_count}",
         reply_markup=await get_menu_keyboard(user_data["user_id"]),
     )
