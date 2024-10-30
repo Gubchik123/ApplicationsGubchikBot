@@ -3,13 +3,13 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from states.applications import Stopping
-from utils.user_manager import UserManager
-from keyboards.default import get_menu_keyboard
 from keyboards.applications import get_urls_keyboard
 from utils.services import (
     get_active_request_loop_task_urls,
     cancel_request_loop_task_by_,
 )
+
+from .sending import send_request_stop_message
 
 
 router = Router()
@@ -37,9 +37,4 @@ async def handle_url_input(message: Message, state: FSMContext):
         return await message.answer("⚠️ Сайт не знайдено.")
     await state.clear()
     cancel_request_loop_task_by_(user_id, url)
-    total_requests = await UserManager.increase_applications_sent(user_id, url)
-    await message.answer(
-        f"⭕️ Відправка заявок на {url} зупинена\n"
-        f"✉️ Всього відправлено заявок: {total_requests}",
-        reply_markup=await get_menu_keyboard(user_id),
-    )
+    await send_request_stop_message(message, url)

@@ -15,12 +15,12 @@ from utils.services import (
     create_request_loop_task,
     cancel_request_loop_task_for_,
 )
-from keyboards.default import get_menu_keyboard
 from keyboards.applications import (
     get_back_applications_menu_keyboard,
     get_frequency_keyboard,
     get_duration_keyboard,
     get_stop_keyboard,
+    get_applications_menu_keyboard,
 )
 
 from .menu import handle_applications_menu
@@ -191,11 +191,18 @@ async def _start_sending_applications(message: Message, state: FSMContext):
 @router.message(F.text.lower() == "зупинити відправку ❌")
 async def handle_stop_sending(message: Message):
     """Handles stop sending button."""
+    await send_request_stop_message(
+        message,
+        url=cancel_request_loop_task_for_(user_id=message.from_user.id),
+    )
+
+
+async def send_request_stop_message(message: Message, url: str):
+    """Sends a message about stopping the request loop task."""
     user_id = message.from_user.id
-    url = cancel_request_loop_task_for_(user_id)
     total_requests = await UserManager.increase_applications_sent(user_id, url)
     await message.answer(
         f"⭕️ Відправка заявок на {url} зупинена\n"
         f"✉️ Всього відправлено заявок: {total_requests}",
-        reply_markup=await get_menu_keyboard(user_id),
+        reply_markup=await get_applications_menu_keyboard(),
     )
