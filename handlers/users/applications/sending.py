@@ -10,6 +10,7 @@ from states.applications import Sending
 from utils.tasks import request_loop
 from utils.user_manager import UserManager
 from utils.services import parse_domain_from_, is_valid_
+from keyboards.default import get_menu_keyboard
 from keyboards.applications import (
     get_back_applications_menu_keyboard,
     get_frequency_keyboard,
@@ -125,5 +126,25 @@ async def _start_sending_applications(message: Message, state: FSMContext):
             url=state_data["url"],
             frequency=state_data["frequency"],
             duration=state_data["duration"],
-        )
+        ),
+        name=f"request_loop-user_{state_data['user_id']}_url_{state_data['url']}",
+    )
+
+
+@router.message(F.text.lower() == "зупинити відправку ❌")
+async def handle_stop_sending(message: Message):
+    """Handles stop sending button."""
+    user_id = message.from_user.id
+    (task,) = [
+        task
+        for task in asyncio.all_tasks()
+        if task.get_name().startswith(f"request_loop-user_{user_id}_")
+    ]
+    url = task.get_name().split("_")[-1]
+    task.cancel()
+    total_requests = await UserManager.increase_applications_sent(user_id, url)
+    await message.answer(
+        f"⭕️ Відправка заявок на {url} зупинена\n"
+        f"✉️ Всього відправлено заявок: {total_requests}",
+        reply_markup=await get_menu_keyboard(user_id),
     )
