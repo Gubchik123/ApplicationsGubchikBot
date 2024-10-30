@@ -60,3 +60,13 @@ async def get_stop_keyboard() -> ReplyKeyboardMarkup:
         keyboard=[[KeyboardButton(text="Зупинити відправку ❌")]],
         resize_keyboard=True,
     )
+
+
+async def get_urls_keyboard(urls: list[str]) -> ReplyKeyboardMarkup:
+    """Returns the keyboard for selecting the URL."""
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=url)] for url in urls]
+        + [[get_back_applications_button()]],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
