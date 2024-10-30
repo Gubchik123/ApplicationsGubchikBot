@@ -18,6 +18,8 @@ from keyboards.applications import (
     get_stop_keyboard,
 )
 
+from .menu import handle_applications_menu
+
 
 router = Router()
 
@@ -114,7 +116,11 @@ async def _start_sending_applications(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
         f"🚀 Космічний шатл з купою заявок вже летить на сайт: {state_data['url']}",
-        reply_markup=await get_stop_keyboard(),
+        reply_markup=(
+            await get_stop_keyboard()
+            if state_data["user_status"] == "demo"
+            else None
+        ),
     )
     asyncio.create_task(
         request_loop(
@@ -129,6 +135,8 @@ async def _start_sending_applications(message: Message, state: FSMContext):
         ),
         name=f"request_loop-user_{state_data['user_id']}_url_{state_data['url']}",
     )
+    if state_data["user_status"] != "demo":
+        await handle_applications_menu(message, state)
 
 
 @router.message(F.text.lower() == "зупинити відправку ❌")
