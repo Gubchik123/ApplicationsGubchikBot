@@ -10,6 +10,7 @@ from utils.user_manager import UserManager
 from utils.services import (
     parse_domain_from_,
     is_valid_,
+    get_active_request_loop_tasks_count,
     create_request_loop_task,
     cancel_request_loop_task_for_,
 )
@@ -33,11 +34,28 @@ async def handle_applications_sending(message: Message, state: FSMContext):
     user_id = message.from_user.id
     logging.info(f"Користувач {user_id} натиснув кнопку 'Запустити відправку'")
 
+    user_data = await UserManager.get_user_data(user_id)
+    active_request_loop_tasks_count = get_active_request_loop_tasks_count(
+        user_id
+    )
+    if (
+        user_data.get("status") == "demo"
+        and active_request_loop_tasks_count > 0
+    ):
+        return await message.answer(
+            "❌ Ви не можете запустити більше однієї відправки заявок одночасно у демо статусі."
+        )
+    if (
+        user_data.get("status") == "unlim"
+        and active_request_loop_tasks_count >= 3
+    ):
+        return await message.answer(
+            "❌ Ви не можете запустити більше трьох відправок заявок одночасно."
+        )
     if await UserManager.is_demo_limit_reached(user_id):
         return await message.answer(
             "❌ Ви вже досягли ліміту в 50 заявок. Для отримання повного доступу зверніться до адміністратора."
         )
-    user_data = await UserManager.get_user_data(user_id)
     if user_data.get("status") != "demo":
         await message.answer(
             "🌐 Введіть посилання на сайт:",
