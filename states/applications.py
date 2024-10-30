@@ -7,3 +7,9 @@ class Sending(StatesGroup):
     url = State()
     frequency = State()
     duration = State()
+
+
+class Stopping(StatesGroup):
+    """States to stop sending applications."""
+
+    url = State()
