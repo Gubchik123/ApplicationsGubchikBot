@@ -76,3 +76,22 @@ def cancel_request_loop_task_for_(user_id: int) -> str:
     url = task.get_name().split("_")[-1]
     task.cancel()
     return url
+
+
+def get_active_request_loop_task_urls(user_id: int) -> list[str]:
+    """Returns a list of active request loop task URLs for the user with the given ID."""
+    return [
+        task.get_name().split("_url_")[-1]
+        for task in asyncio.all_tasks()
+        if task.get_name().startswith(f"request_loop-user_{user_id}_")
+    ]
+
+
+def cancel_request_loop_task_by_(user_id: int, url: str) -> None:
+    """Cancels the request loop task by the the given user ID and URL."""
+    (task,) = [
+        task
+        for task in asyncio.all_tasks()
+        if task.get_name().startswith(f"request_loop-user_{user_id}_url_{url}")
+    ]
+    task.cancel()
