@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from aiogram import Router, F
 from aiogram.types import Message
@@ -38,24 +39,57 @@ async def handle_applications_sending(message: Message, state: FSMContext):
     active_request_loop_tasks_count = get_active_request_loop_tasks_count(
         user_id
     )
+    # Перевірка статусу користувача
+    if demo_status_message := await _check_demo_status(
+        user_data, active_request_loop_tasks_count
+    ):
+        return await message.answer(demo_status_message)
+    if unlim_status_message := await _check_unlim_status(
+        user_data, active_request_loop_tasks_count
+    ):
+        return await message.answer(unlim_status_message)
+    if demo_limit_message := await _check_demo_limit(user_id):
+        return await message.answer(demo_limit_message)
+
+    await _send_message_based_on_status(message, user_data)
+    await _update_state(state, user_id, user_data)
+
+
+async def _check_demo_status(
+    user_data: dict, active_request_loop_tasks_count: int
+) -> Optional[str]:
+    """Checks demo status and active request loop tasks."""
     if (
         user_data.get("status") == "demo"
         and active_request_loop_tasks_count > 0
     ):
-        return await message.answer(
-            "❌ Ви не можете запустити більше однієї відправки заявок одночасно у демо статусі."
-        )
+        return "❌ Ви не можете запустити більше однієї відправки заявок одночасно у демо статусі."
+    return None
+
+
+async def _check_unlim_status(
+    user_data: dict, active_request_loop_tasks_count: int
+) -> Optional[str]:
+    """Checks unlim status and active request loop tasks."""
     if (
         user_data.get("status") == "unlim"
         and active_request_loop_tasks_count >= 3
     ):
-        return await message.answer(
-            "❌ Ви не можете запустити більше трьох відправок заявок одночасно."
-        )
+        return "❌ Ви не можете запустити більше трьох відправок заявок одночасно."
+    return None
+
+
+async def _check_demo_limit(user_id: int) -> Optional[str]:
+    """Checks if demo limit is reached."""
     if await UserManager.is_demo_limit_reached(user_id):
-        return await message.answer(
-            "❌ Ви вже досягли ліміту в 50 заявок. Для отримання повного доступу зверніться до адміністратора."
-        )
+        return "❌ Ви вже досягли ліміту в 50 заявок. Для отримання повного доступу зверніться до адміністратора."
+    return None
+
+
+async def _send_message_based_on_status(
+    message: Message, user_data: dict
+) -> None:
+    """Sends message based on user status."""
     if user_data.get("status") != "demo":
         await message.answer(
             "🌐 Введіть посилання на сайт:",
@@ -67,6 +101,12 @@ async def handle_applications_sending(message: Message, state: FSMContext):
             f"🌐 Ви можете надіслати ще до {requests_to_send} заявок. Введіть посилання на сайт:",
             reply_markup=await get_back_applications_menu_keyboard(),
         )
+
+
+async def _update_state(
+    state: FSMContext, user_id: int, user_data: dict
+) -> None:
+    """Updates the state with user data."""
     await state.set_state(Sending.url)
     await state.update_data(
         user_id=user_id,
