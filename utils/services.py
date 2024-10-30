@@ -1,8 +1,10 @@
 import random
+import asyncio
 
 import phonenumbers
 from urllib.parse import urlparse
 
+from utils.tasks import request_loop
 from data.constants import UKRAINIAN_NAMES, OPERATORS
 
 
@@ -36,3 +38,32 @@ def parse_domain_from_(url: str) -> str:
     """Returns domain from the given URL."""
     domain = urlparse(url).netloc
     return domain[4:] if domain.startswith("www.") else domain
+
+
+def create_request_loop_task(state_data: dict):
+    """Creates a task for sending requests with the given state data."""
+    asyncio.create_task(
+        request_loop(
+            user_data={
+                "user_id": state_data["user_id"],
+                "status": state_data["user_status"],
+                "applications_sent": state_data["user_applications_sent"],
+            },
+            url=state_data["url"],
+            frequency=state_data["frequency"],
+            duration=state_data["duration"],
+        ),
+        name=f"request_loop-user_{state_data['user_id']}_url_{state_data['url']}",
+    )
+
+
+def cancel_request_loop_task_for_(user_id: int) -> str:
+    """Cancels the request loop task for the user with the given ID."""
+    (task,) = [
+        task
+        for task in asyncio.all_tasks()
+        if task.get_name().startswith(f"request_loop-user_{user_id}_")
+    ]
+    url = task.get_name().split("_")[-1]
+    task.cancel()
+    return url
