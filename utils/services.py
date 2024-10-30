@@ -4,7 +4,6 @@ import asyncio
 import phonenumbers
 from urllib.parse import urlparse
 
-from utils.tasks import request_loop
 from data.constants import UKRAINIAN_NAMES, OPERATORS
 
 
@@ -40,8 +39,18 @@ def parse_domain_from_(url: str) -> str:
     return domain[4:] if domain.startswith("www.") else domain
 
 
+def get_active_request_loop_tasks_count(user_id: int) -> int:
+    """Returns the number of active request loop tasks for the user with the given ID."""
+    return sum(
+        task.get_name().startswith(f"request_loop-user_{user_id}_")
+        for task in asyncio.all_tasks()
+    )
+
+
 def create_request_loop_task(state_data: dict):
     """Creates a task for sending requests with the given state data."""
+    from utils.tasks import request_loop
+
     asyncio.create_task(
         request_loop(
             user_data={
